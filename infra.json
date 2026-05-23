@@ -1,0 +1,11 @@
+{
+  "app_name": "InvoicePilot",
+  "slug": "invoicepilot",
+  "folder": "/Volumes/My Passport for Mac/InvoicePilot",
+  "github_repository": "https://github.com/ronb12/invoicepilot",
+  "vercel_project": "invoicepilot",
+  "vercel_url": "https://invoicepilot-gx8inhd3g-ronell-bradleys-projects.vercel.app\",",
+  "neon_project_id": "wild-truth-62521761",
+  "neon_database_name": "invoicepilot",
+  "neon_console_url": "https://console.neon.tech/app/projects/wild-truth-62521761"
+}
