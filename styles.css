@@ -26,6 +26,26 @@ body {
   padding: 38px 0;
 }
 
+.subnav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.subnav-tab {
+  width: auto;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.subnav-tab.active {
+  color: white;
+  background: var(--blue);
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 390px;
@@ -154,6 +174,44 @@ button.ghost {
   margin-top: 24px;
 }
 
+.split-layout,
+.spotlight-grid,
+.followup-board {
+  display: grid;
+  gap: 18px;
+}
+
+.split-layout {
+  grid-template-columns: 1.05fr 1fr;
+  margin-top: 18px;
+}
+
+.spotlight-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.small {
+  font-size: 0.72rem;
+}
+
+.followup-item,
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #ebeef7;
+}
+
+.followup-item {
+  flex-direction: column;
+}
+
+.followup-item span {
+  color: #667085;
+  font-size: 0.92rem;
+}
+
 article,
 .settings-note {
   padding: 24px;
@@ -189,7 +247,9 @@ article,
 
 @media (max-width: 900px) {
   .hero,
-  .dashboard {
+  .dashboard,
+  .split-layout,
+  .spotlight-grid {
     grid-template-columns: 1fr;
   }
 }

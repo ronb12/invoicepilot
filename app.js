@@ -1,6 +1,7 @@
 (() => {
   const app = document.querySelector("#app");
-  const state = { clients: [], invoices: [], followups: [], stats: {} };
+  const tabs = [...document.querySelectorAll(".subnav-tab")];
+  const state = { activeTab: "overview", clients: [], invoices: [], followups: [], stats: {} };
   const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
   function formatDate(value) {
@@ -22,6 +23,16 @@
 
   function renderCollection(items, mapper, emptyText) {
     return items.length ? items.map(mapper).join("") : `<div class="settings-note">${emptyText}</div>`;
+  }
+
+  function bindTabs() {
+    tabs.forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.tab === state.activeTab);
+      tab.onclick = () => {
+        state.activeTab = tab.dataset.tab;
+        render();
+      };
+    });
   }
 
   function bindForms() {
@@ -67,7 +78,122 @@
     });
   }
 
+  function renderOverview() {
+    const dueSoon = state.invoices.slice().sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))[0];
+    return `
+      <section class="split-layout">
+        <article class="settings-note spotlight-card">
+          <span class="eyebrow small">Next collection</span>
+          ${dueSoon ? `
+            <h2>${dueSoon.invoice_code}</h2>
+            <p>${dueSoon.client_name} • ${dueSoon.project_name}</p>
+            <div class="spotlight-grid">
+              <div><span class="muted">Amount</span><strong>${money.format(dueSoon.amount)}</strong></div>
+              <div><span class="muted">Status</span><strong>${dueSoon.status}</strong></div>
+              <div><span class="muted">Due</span><strong>${formatDate(dueSoon.due_date)}</strong></div>
+            </div>
+          ` : `<div class="settings-note">No invoices are queued yet.</div>`}
+        </article>
+        <article class="settings-note">
+          <h2>Reminder Queue</h2>
+          <div class="followup-board">
+            ${renderCollection(
+              state.followups,
+              (item) => `<div class="followup-item"><strong>${item.invoice_code}</strong><p>${item.note}</p><span>${item.channel} • ${item.status} • ${formatDate(item.scheduled_for)}</span></div>`,
+              "No follow-ups are queued."
+            )}
+          </div>
+        </article>
+      </section>
+    `;
+  }
+
+  function renderClients() {
+    return `
+      <section class="settings-note">
+        <h2>Clients</h2>
+        <form id="clientForm" style="display:grid;gap:10px">
+          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+            <input name="name" placeholder="Client name" required>
+            <input name="email" placeholder="Billing email" required>
+          </div>
+          <input name="segment" placeholder="Segment" required>
+          <button type="submit">Add client</button>
+        </form>
+        ${renderCollection(
+          state.clients,
+          (client) => `<div class="list-row"><div><b>${client.name}</b><div>${client.email}</div></div><div>${client.segment}</div></div>`,
+          "No clients yet."
+        )}
+      </section>
+    `;
+  }
+
+  function renderInvoices() {
+    return `
+      <section class="split-layout">
+        <article class="settings-note">
+          <h2>Invoices</h2>
+          <form id="invoiceForm" style="display:grid;gap:10px">
+            <select name="clientId">${state.clients.map((client) => `<option value="${client.id}">${client.name}</option>`).join("")}</select>
+            <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+              <input name="invoiceCode" placeholder="Invoice code" required>
+              <input name="projectName" placeholder="Project name" required>
+            </div>
+            <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr">
+              <input name="amount" type="number" min="0" placeholder="Amount" required>
+              <input name="dueDate" type="date" required>
+              <select name="status"><option>Pending</option><option>Sent</option><option>Paid</option></select>
+            </div>
+            <button type="submit">Create invoice</button>
+          </form>
+        </article>
+        <article class="settings-note">
+          <h2>Invoice Ledger</h2>
+          ${renderCollection(
+            state.invoices,
+            (invoice) => `<div class="list-row"><div><b>${invoice.invoice_code}</b><div>${invoice.client_name} • ${invoice.project_name}</div></div><div>${money.format(invoice.amount)} • ${invoice.status} • due ${formatDate(invoice.due_date)}</div></div>`,
+            "No invoices yet."
+          )}
+        </article>
+      </section>
+    `;
+  }
+
+  function renderFollowups() {
+    return `
+      <section class="split-layout">
+        <article class="settings-note">
+          <h2>Follow-ups</h2>
+          <form id="followupForm" style="display:grid;gap:10px">
+            <select name="invoiceId">${state.invoices.map((invoice) => `<option value="${invoice.id}">${invoice.invoice_code}</option>`).join("")}</select>
+            <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr">
+              <select name="channel"><option>Email</option><option>SMS</option><option>Call</option></select>
+              <select name="status"><option>Queued</option><option>Prepared</option><option>Done</option></select>
+              <input name="scheduledFor" type="date" required>
+            </div>
+            <input name="note" placeholder="Reminder note" required>
+            <button type="submit">Log follow-up</button>
+          </form>
+        </article>
+        <article class="settings-note">
+          <h2>Follow-up History</h2>
+          ${renderCollection(
+            state.followups,
+            (item) => `<div class="list-row"><div><b>${item.invoice_code}</b><div>${item.note}</div></div><div>${item.channel} • ${item.status} • ${formatDate(item.scheduled_for)}</div></div>`,
+            "No follow-ups yet."
+          )}
+        </article>
+      </section>
+    `;
+  }
+
   function render() {
+    let view = renderOverview();
+    if (state.activeTab === "clients") view = renderClients();
+    if (state.activeTab === "invoices") view = renderInvoices();
+    if (state.activeTab === "followups") view = renderFollowups();
+
     app.innerHTML = `
       <section class="dashboard">
         <article>
@@ -91,62 +217,9 @@
           <p>Reminder tasks still in motion.</p>
         </article>
       </section>
-      <section class="settings-note">
-        <h2>Clients</h2>
-        <form id="clientForm" style="display:grid;gap:10px">
-          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
-            <input name="name" placeholder="Client name" required>
-            <input name="email" placeholder="Billing email" required>
-          </div>
-          <input name="segment" placeholder="Segment" required>
-          <button type="submit">Add client</button>
-        </form>
-        ${renderCollection(
-          state.clients,
-          (client) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #ebeef7"><div><b>${client.name}</b><div>${client.email}</div></div><div>${client.segment}</div></div>`,
-          "No clients yet."
-        )}
-      </section>
-      <section class="settings-note">
-        <h2>Invoices</h2>
-        <form id="invoiceForm" style="display:grid;gap:10px">
-          <select name="clientId">${state.clients.map((client) => `<option value="${client.id}">${client.name}</option>`).join("")}</select>
-          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
-            <input name="invoiceCode" placeholder="Invoice code" required>
-            <input name="projectName" placeholder="Project name" required>
-          </div>
-          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr">
-            <input name="amount" type="number" min="0" placeholder="Amount" required>
-            <input name="dueDate" type="date" required>
-            <select name="status"><option>Pending</option><option>Sent</option><option>Paid</option></select>
-          </div>
-          <button type="submit">Create invoice</button>
-        </form>
-        ${renderCollection(
-          state.invoices,
-          (invoice) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #ebeef7"><div><b>${invoice.invoice_code}</b><div>${invoice.client_name} • ${invoice.project_name}</div></div><div>${money.format(invoice.amount)} • ${invoice.status} • due ${formatDate(invoice.due_date)}</div></div>`,
-          "No invoices yet."
-        )}
-      </section>
-      <section class="settings-note">
-        <h2>Follow-ups</h2>
-        <form id="followupForm" style="display:grid;gap:10px">
-          <select name="invoiceId">${state.invoices.map((invoice) => `<option value="${invoice.id}">${invoice.invoice_code}</option>`).join("")}</select>
-          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr">
-            <select name="channel"><option>Email</option><option>SMS</option><option>Call</option></select>
-            <select name="status"><option>Queued</option><option>Prepared</option><option>Done</option></select>
-            <input name="scheduledFor" type="date" required>
-          </div>
-          <input name="note" placeholder="Reminder note" required>
-          <button type="submit">Log follow-up</button>
-        </form>
-        ${renderCollection(
-          state.followups,
-          (item) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #ebeef7"><div><b>${item.invoice_code}</b><div>${item.note}</div></div><div>${item.channel} • ${item.status} • ${formatDate(item.scheduled_for)}</div></div>`,
-          "No follow-ups yet."
-        )}
-      </section>
+      ${view}
     `;
+    bindTabs();
     bindForms();
   }
 
