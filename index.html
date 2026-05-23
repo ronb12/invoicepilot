@@ -1,73 +1,33 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InvoicePilot Prototype</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvoicePilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <main class="shell">
       <section class="hero">
         <div class="copy">
-          <p class="eyebrow">Prototype 13 • Small business billing</p>
+          <p class="eyebrow">Billing operations cockpit</p>
           <h1>InvoicePilot</h1>
           <p>
-            A clean invoice command center for freelancers and small businesses:
-            create quotes, send invoices, track overdue payments, and preview cash flow
-            without needing a full accounting system.
+            Track clients, invoices, and payment follow-ups without hauling in a full accounting suite.
           </p>
-          <div class="actions">
-            <button id="sendInvoice" type="button">Send Demo Invoice</button>
-            <button id="markPaid" class="ghost" type="button">Mark Paid</button>
-          </div>
         </div>
-
-        <aside class="invoice-card" aria-label="Invoice preview">
-          <div class="invoice-head">
-            <span>INV-2048</span>
-            <strong id="invoiceStatus">Pending</strong>
-          </div>
-          <h2>Website Refresh</h2>
-          <p>Due May 20, 2026</p>
-          <div class="total">
-            <span>Total</span>
-            <b>$2,450</b>
-          </div>
-          <div class="progress"><i id="progressBar"></i></div>
+        <aside class="invoice-card">
+          <span>Collections flow</span>
+          <strong>Clients -> invoices -> follow-ups</strong>
+          <p>Built for small teams managing billing momentum.</p>
         </aside>
       </section>
-
-      <section class="dashboard">
-        <article>
-          <span class="kpi">$8,720</span>
-          <h2>Open Invoices</h2>
-          <p>Five invoices waiting on customer payment.</p>
-        </article>
-        <article>
-          <span class="kpi">$4,180</span>
-          <h2>Expected This Week</h2>
-          <p>Forecasted cash flow based on due dates and reminders.</p>
-        </article>
-        <article>
-          <span class="kpi">3</span>
-          <h2>Follow-ups Due</h2>
-          <p>Automated email reminders can use masked Resend settings later.</p>
-        </article>
+      <section id="app" class="app-shell">
+        <div class="settings-note">Loading InvoicePilot...</div>
       </section>
-
-      <section class="settings-note">
-        <h2>Admin Settings Later</h2>
-        <p>
-          Add masked Stripe publishable/secret keys for checkout and masked Resend API
-          key for invoice reminders, following the portfolio settings pattern.
-        </p>
-      </section>
-
-      <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </main>
     <script src="./app.js"></script>
   </body>
